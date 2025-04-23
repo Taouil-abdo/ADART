@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
+            $table->integer('roomNumber');
+            $table->enum('roomStatus', ['available', 'occupied','maintenance']);
+            $table->string('capacity', 222);
+            $table->string('block', 222);
             $table->timestamps();
         });
     }
