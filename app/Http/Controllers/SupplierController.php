@@ -13,7 +13,8 @@ class SupplierController extends Controller
      */
     public function index()
     {
-        return view('Admin.suppliers.supplier');
+        $suppliers = Supplier::paginate(5);
+        return view('Admin.suppliers.supplier', compact('suppliers'));
     }
 
     /**
@@ -29,7 +30,12 @@ class SupplierController extends Controller
      */
     public function store(StoreSupplierRequest $request)
     {
-        //
+        try {
+            Supplier::create($request->validated());
+            return redirect()->route('supplier.index')->with('success', 'Supplier Added successfully');
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', 'Failed to add supplier');
+        }
     }
 
     /**
@@ -63,4 +69,6 @@ class SupplierController extends Controller
     {
         //
     }
+
+    
 }
