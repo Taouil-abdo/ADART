@@ -15,17 +15,17 @@
 
     <div class="container mx-auto px-4 py-6">
         <div class="bg-white shadow-md rounded-lg">
+        <h2 class="text-2xl font-semibold text-gray-800">Residents List</h2>
             <div class="flex justify-between items-center p-6 border-b">
-                <h2 class="text-2xl font-semibold text-gray-800">Residents List</h2>
-                <button onclick="openAddResidentModal()"
-                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded inline-flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
                         fill="currentColor">
                         <path fill-rule="evenodd"
                             d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
                             clip-rule="evenodd" />
                     </svg>
-                    Add Resident
+                    <a href="{{route('residents.create')}}">Add Resident</a>
                 </button>
             </div>
 
@@ -36,6 +36,7 @@
                             <th class="py-3 px-6 text-left">ID</th>
                             <th class="py-3 px-6 text-left">Full Name</th>
                             <th class="py-3 px-6 text-left">Age</th>
+                            <th class="py-3 px-6 text-left">gender</th>
                             <th class="py-3 px-6 text-left">School Level</th>
                             <th class="py-3 px-6 text-left">School</th>
                             <th class="py-3 px-6 text-center">Status</th>
@@ -43,31 +44,43 @@
                         </tr>
                     </thead>
                     <tbody class="text-gray-600 text-sm font-light">
+                     @if($residents)
+                       @foreach ($residents as $resident)
                         <tr class="border-b border-gray-200 hover:bg-gray-100">
                             <td class="py-3 px-6 text-left">
-                                1
+                               {{ $resident->id }}
                             </td>
                             <td class="py-3 px-6 text-left">
-                                fullname 
+                                {{ $resident->fullname }}
                             </td>
                             <td class="py-3 px-6 text-left">
-                                age 
+                                {{ $resident->age }}
                             </td>
                             <td class="py-3 px-6 text-left">
-                                schoolLevel 
+                                {{ $resident->gender }}
                             </td>
                             <td class="py-3 px-6 text-left">
-                                school 
+                                {{ $resident->school_level }}
+                            </td>
+                            <td class="py-3 px-6 text-left">
+                                {{ $resident->school }}
                             </td>
                             <td class="py-3 px-6 text-center">
                                 <span class="
-                                reStatus == 'Active' ? 'bg-green-200 text-green-600' : 'bg-red-200 text-red-600' }}  
+                                status == 'Active' ? 'bg-green-200 text-green-600' : 'bg-red-200 text-red-600' }}  
                                 py-1 px-3 rounded-full text-xs">
-                                    reStatus 
+                                    {{ $resident->status }}
                                 </span>
                             </td>
                             <td class="py-3 px-6 text-center">
                                 <div class="flex item-center justify-center">
+                                    <button class="w-4 mr-2 transform hover:text-blue-500 hover:scale-110">
+                                        <a href="{{ route('residents.download', $resident->id) }}" >
+                                                <span class="flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 144-208 0c-35.3 0-64 28.7-64 64l0 144-48 0c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zM176 352l32 0c30.9 0 56 25.1 56 56s-25.1 56-56 56l-16 0 0 32c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48 0-80c0-8.8 7.2-16 16-16zm32 80c13.3 0 24-10.7 24-24s-10.7-24-24-24l-16 0 0 48 16 0zm96-80l32 0c26.5 0 48 21.5 48 48l0 64c0 26.5-21.5 48-48 48l-32 0c-8.8 0-16-7.2-16-16l0-128c0-8.8 7.2-16 16-16zm32 128c8.8 0 16-7.2 16-16l0-64c0-8.8-7.2-16-16-16l-16 0 0 96 16 0zm80-112c0-8.8 7.2-16 16-16l48 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 32 32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 48c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-64 0-64z"/></svg>
+                                                </span>
+                                            </a>
+                                    </button>
                                     <button onclick="openEditResidentModal(id }})"
                                         class="w-4 mr-2 transform hover:text-blue-500 hover:scale-110">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -87,57 +100,24 @@
                                 </div>
                             </td>
                         </tr>
+                        @endforeach
+                     @else
+                            <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                <td colspan="7" class="py-3 px-6 text-center text-gray-500">No residents found.</td>
+                            </tr>
+                     @endif
+
                     </tbody>
                 </table>
+                    <div>
+                        {{ $residents->links() }}
+                    </div>
             </div>
         </div>
     </div>
+</div>
 
-    {{-- Add Resident Modal --}}
-    <div id="addResidentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Add New Resident</h3>
-                <form action="" method="POST" class="mt-4">
-                    @csrf
-                    <input type="text" name="fullname" placeholder="Full Name"
-                        class="w-full px-3 py-2 border rounded-md mb-3" required>
-                    <input type="date" name="birthday" placeholder="Birthday"
-                        class="w-full px-3 py-2 border rounded-md mb-3" required>
-                    <input type="text" name="address" placeholder="Address"
-                        class="w-full px-3 py-2 border rounded-md mb-3" required>
-                    <select name="schoolLevel" class="w-full px-3 py-2 border rounded-md mb-3">
-                        <option value="">Select School Level</option>
-                        <option value="Primary">Primary</option>
-                        <option value="Secondary">Secondary</option>
-                        <option value="High School">High School</option>
-                    </select>
-                    <input type="text" name="school" placeholder="School Name"
-                        class="w-full px-3 py-2 border rounded-md mb-3">
-                    <input type="text" name="urgentContact" placeholder="Urgent Contact Number"
-                        class="w-full px-3 py-2 border rounded-md mb-3">
-                    <select name="reStatus" class="w-full px-3 py-2 border rounded-md mb-3" required>
-                        <option value="">Select Residence Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
-                    <div class="flex items-center mb-3">
-                        <input type="checkbox" name="healthCondition" id="addResidentHealth" value="1" class="mr-2">
-                        <label for="addResidentHealth">Any Health Conditions</label>
-                    </div>
-                    <div class="flex justify-between mt-4">
-                        <button type="button" onclick="closeAddResidentModal()"
-                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
-                            Cancel
-                        </button>
-                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                            Save
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+
 
     {{-- Edit Resident Modal --}}
     <div id="editResidentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
@@ -196,15 +176,14 @@
             document.getElementById('addResidentModal').classList.add('hidden');
         }
 
-        function openEditResidentModal() {
-           }
+        function openEditResidentModal() {}
 
         function closeEditResidentModal() {
             document.getElementById('editResidentModal').classList.add('hidden');
         }
 
         function confirmDeleteResident() {
-           
+
         }
         </script>
     </x-slot:scripts>
