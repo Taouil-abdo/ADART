@@ -23,7 +23,6 @@ class AuthController extends Controller
 
     public function login(UserRequest $request)
     {
-        
         if (!$this->userRepository->loginUser($request->validated())) {
             return back()->withErrors(['email' => 'Invalid credentials']);
         }
@@ -32,10 +31,14 @@ class AuthController extends Controller
 
     public function logout()
     {
-        $user = Auth::user();
+     $user = Auth::user();
+     if ($user) {
         $user->tokens()->delete();
-        return redirect()->route('login');
+     }
+     Auth::logout(); 
+     return redirect()->route('login');
     }
+
 
 
 }

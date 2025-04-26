@@ -16,10 +16,8 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::user()->role_id != 1) {
-            // return response()->json('Opps! You do not have permission to access.');
-            return view('Auth.login');
-
+        if (!Auth::user() || Auth::user()->role_id != 1) {
+            return redirect()->route('login');
         }
         return $next($request);
     }
