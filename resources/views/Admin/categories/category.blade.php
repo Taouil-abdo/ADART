@@ -39,46 +39,46 @@
                         </tr>
                     </thead>
                     <tbody class="text-gray-600 text-sm font-light">
-                     @if($categories)
-                      @foreach($categories as $category)
-                        <tr class="border-b border-gray-200 hover:bg-gray-100">
-                            <td class="py-3 px-6 text-center whitespace-nowrap">
-                                <div class="flex items-center text-center ">
-                                    {{$category->id}}
-                                </div>
-                            </td>
-                            <td class="py-3 px-6 text-center">
-                                {{$category->name}}
-                            </td>
-                            <td class="py-3 px-6 text-center">
-                                <div class="flex item-center justify-center">
-                                    <a href="{{route('category.edit',$category->id)}}"
-                                        class="w-4 mr-2 transform hover:text-blue-500 hover:scale-110">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                        </svg>
-                                    </a>
-                                    <button onclick="confirmDeleteCategory( $category->id )"
-                                        class="w-4 mr-2 transform hover:text-red-500 hover:scale-110">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                      @endforeach
-                      @else
-                        <tr>
-                            <td colspan="4" class="text-center py-4">No categories found</td>
-                        </tr>   
-                    @endif
+                        @if($categories->count())
+                            @foreach($categories as $category)
+                                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                    <td class="py-3 px-6 text-center">{{ $category->id }}</td>
+                                    <td class="py-3 px-6 text-center">{{ $category->name }}</td>
+                                    <td class="py-3 px-6 text-center">
+                                        <div class="flex justify-center space-x-4">
+                                            <a href="{{ route('category.edit', $category->id) }}"
+                                                class="text-blue-500 hover:scale-110 transition transform">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor" class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </a>
+
+                                            <form id="deleteCategoryForm{{ $category->id }}" method="POST" action="{{ route('category.destroy', $category->id) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" onclick="confirmDeleteCategory({{ $category->id }})"
+                                                    class="text-red-500 hover:scale-110 transition transform">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                        stroke="currentColor" class="w-5 h-5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="3" class="text-center py-4">No categories found</td>
+                            </tr>
+                        @endif
                     </tbody>
                 </table>
+
                 <div class="mt-4">
                     {{ $categories->links() }}
                 </div>
@@ -90,17 +90,18 @@
     <div id="addCategoryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Add New Category</h3>
-                <form id="addCategoryForm" action="{{route('category.store')}}" class="mt-4" method="POST">
+                <h3 class="text-lg font-medium text-gray-900">Add New Category</h3>
+                <form id="addCategoryForm" action="{{ route('category.store') }}" method="POST" class="mt-4">
                     @csrf
-                    @method('POST')
-                    <input type="text" name="name" placeholder="Category Name" class="w-full px-3 py-2 border rounded-md mb-3" required>
+                    <input type="text" name="name" placeholder="Category Name"
+                        class="w-full px-3 py-2 border rounded-md mb-3" required>
                     <div class="flex justify-between mt-4">
                         <button type="button" onclick="closeAddCategoryModal()"
                             class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        <button type="submit"
+                            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                             Save
                         </button>
                     </div>
@@ -110,25 +111,68 @@
     </div>
 
     <x-slot:scripts>
-     <script>
-        function openAddCategoryModal() {
-            document.getElementById('addCategoryModal').classList.remove('hidden');
-        }
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        function closeAddCategoryModal() {
-            document.getElementById('addCategoryModal').classList.add('hidden');
-        }
+        <script>
+            function openAddCategoryModal() {
+                document.getElementById('addCategoryModal').classList.remove('hidden');
+            }
 
-        function openEditCategoryModal() {
-            document.getElementById('editCategoryModal').classList.remove('hidden');
-        }
+            function closeAddCategoryModal() {
+                document.getElementById('addCategoryModal').classList.add('hidden');
+            }
 
-        function closeEditCategoryModal() {
-            document.getElementById('editCategoryModal').classList.add('hidden');
-        }
+            async function confirmDeleteCategory(id) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await fetch(`{{ url('category') }}/${id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Content-Type': 'application/json'
+                                }
+                            });
 
+                            if (response.ok) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Category has been deleted.',
+                                    'success'
+                                );
+                                const row = document.querySelector(`#deleteCategoryForm${id}`).closest('tr');
+                                if (row) {
+                                    row.remove();
+                                }
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'Failed to delete the category. Please try again.',
+                                    'error'
+                                );
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            Swal.fire(
+                                'Error!',
+                                'An error occurred. Please try again.',
+                                'error'
+                            );
+                        }
+                    }
+                });
+            }
 
-
-     </script>
+                
+        
+        </script>
     </x-slot:scripts>
 </x-layouts.app>

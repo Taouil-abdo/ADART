@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-slot:title>Dashboard - DART TALIB</x-slot:title>
+    <x-slot:title>Dashboard - DAR TALIB</x-slot:title>
 
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Dashboard Overview</h1>

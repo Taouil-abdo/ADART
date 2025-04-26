@@ -77,6 +77,7 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         $this->CategoryRepository->delete($id);
-        return redirect()->route('category.index')->with('success', 'Category deleted successfully');
+        return response()->json(['success' => 'Category deleted successfully']);
+        // return redirect()->route('category.index')->with('success', 'Category deleted successfully');
     }
 }

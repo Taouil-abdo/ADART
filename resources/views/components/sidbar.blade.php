@@ -1,6 +1,6 @@
-<div :class="sidebarOpen ? 'w-64' : 'w-20'" class="bg-gradient-to-br from-indigo-800 to-indigo-900 text-white transition-all duration-300 shadow-xl h-screen flex flex-col">
+<div :class="sidebarOpen ? 'w-64' : 'w-20'" class="bg-gradient-to-r from-purple-600 to-indigo-600 to-gray-800 text-white transition-all duration-300 shadow-xl h-screen flex flex-col">
     <!-- Header with Logo -->
-    <div class="p-4 flex items-center justify-between border-b border-indigo-700/50">
+    <div class="p-4 flex items-center justify-between bg-gradient-to-r from-purple-600 to-indigo-600">
         <div class="flex items-center space-x-3">
             <!-- Logo icon that's always visible -->
             <div class="flex-shrink-0 bg-white rounded-full p-1.5 shadow-md">

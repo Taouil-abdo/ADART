@@ -56,8 +56,6 @@ class RoomController extends Controller
     {
         $room = $this->roomRepository->find($id);
         return view('Admin.rooms.room', compact('room'));
-        
-
     }
 
     /**
