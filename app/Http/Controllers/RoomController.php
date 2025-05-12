@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
-use App\Repositories\RoomRepositoryInterface;
+use Illuminate\Http\Request;
 use App\Http\Requests\StoreRoomRequest;
 use App\Http\Requests\UpdateRoomRequest;
+use App\Repositories\RoomRepositoryInterface;
 
 class RoomController extends Controller
 {
@@ -18,8 +19,13 @@ class RoomController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        if($request->ajax() || $request->wantsJson()){
+            $search = $request->q ?? '';
+            $rooms = $this->roomRepository->search($search);
+            return response()->json(['rooms' => $rooms]);
+        }
         $rooms = $this->roomRepository->all();
         return view('Admin.rooms.room',compact('rooms'));
     }
@@ -73,6 +79,8 @@ class RoomController extends Controller
     public function destroy($id)
     {
         $this->roomRepository->delete($id);
-        return redirect()->route('rooms.index')->with('success', 'Room deleted successfully');
+        return response()->json([
+            'message' => 'Room deleted successfully.'
+        ]);
     }
 }
