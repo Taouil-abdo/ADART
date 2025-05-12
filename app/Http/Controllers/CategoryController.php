@@ -6,6 +6,7 @@ use Exception;
 use App\Models\Category;
 // use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Repositories\CategoryRepositoryInterface;
@@ -20,10 +21,15 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->ajax() || $request->wantsJson()) {
+            $search = $request->q ?? '';
+            $categories = $this->CategoryRepository->search($search);
+            return response()->json(['categories' => $categories]);
+        }
         $categories = $this->CategoryRepository->all();
-        return view('Admin.categories.category',compact('categories'));
+        return view('Admin.categories.category', compact('categories'));
     }
 
     /**
