@@ -15,7 +15,6 @@ class Supplier extends Model
         'email',
         'address',
         'suppliedProduct',
-        'paymentMethode',
         'isActive',
     ];
 

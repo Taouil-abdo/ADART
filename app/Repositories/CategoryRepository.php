@@ -6,6 +6,10 @@ use App\Models\Category;
 
 class CategoryRepository implements CategoryRepositoryInterface
 {
+    public function search(string $search)
+    {
+        return Category::where('name', 'like', "%{$search}%")->get();
+    }
     public function all()
     {
         return Category::paginate(5);
