@@ -81,8 +81,6 @@ class ForgotPasswordController extends Controller
           
             return redirect('/')->with('register_success', 'Your password has been changed!');
             
-
-
         } catch (\Exception $e) {
             return redirect()->back()->with('error_message', $e->getMessage());
 

@@ -261,7 +261,7 @@ class DashboardController extends Controller
     }
     
     private function getRoomsByStatus()
-{
+    {
     // Get rooms grouped by status
     $rooms = Room::select('roomStatus', DB::raw('count(*) as count'))
         ->groupBy('roomStatus')
@@ -299,7 +299,7 @@ class DashboardController extends Controller
             ]
         ]
     ];
-}
+    }
     
     private function getRoomsByCapacity()
     {
