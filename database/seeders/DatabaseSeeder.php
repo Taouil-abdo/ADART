@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\ResidentSeeder;
@@ -17,20 +18,22 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            RoleSeeder::class,
+        //     RoleSeeder::class,
             CategorySeeder::class,
-            SupplierSeeder::class,
-            RoomSeeder::class,
-            StockSeeder::class,
-            ResidentSeeder::class,
+        //     SupplierSeeder::class,
+        //     RoomSeeder::class,
+        //     StockSeeder::class,
+        //     ResidentSeeder::class,
         ]);
 
-        User::create([
-            'fullname' => 'admin',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('admin2025'), 
-            'role_id' => 1, 
-        ]);
+        // User::create([
+        //     'fullname' => 'admin',
+        //     'email' => 'admin@gmail.com',
+        //     'password' => Hash::make('admin2025'), 
+        //     'role_id' => 1, 
+        // ]);
+
+       
 
         
     }
