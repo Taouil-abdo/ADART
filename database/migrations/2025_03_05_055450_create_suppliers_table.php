@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('address');
             $table->string('suppliedProduct');
-            $table->enum('paymentMethod', ['cash', 'credit']);
             $table->boolean('isActive')->default(1);
             $table->timestamps();
         });

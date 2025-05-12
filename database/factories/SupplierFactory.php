@@ -22,7 +22,6 @@ class SupplierFactory extends Factory
         'email' => $this->faker->unique()->safeEmail,
         'address' => $this->faker->address,
         'suppliedProduct' => $this->faker->word,
-        'paymentMethod' => $this->faker->randomElement(['cash', 'credit']),
         'isActive' => $this->faker->boolean,
         ];
     }
