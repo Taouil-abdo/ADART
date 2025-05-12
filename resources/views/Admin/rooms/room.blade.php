@@ -1,22 +1,21 @@
 <x-layouts.app>
-    <x-slot:title>Dashboard - DART TALIB</x-slot:title>
+    <x-slot:title>Room - DART TALIB</x-slot:title>
 
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Dashboard Overview</h1>
-        <div>
-            <select class="bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
-                <option>Last 7 days</option>
-                <option>Last 30 days</option>
-                <option>This month</option>
-                <option>Last quarter</option>
-            </select>
-        </div>
+    <div class="flex flex-col gap-4 mb-6">
+        <nav class="text-xl text-gray-600">
+            <a href="{{ route('dashboard') }}" class="text-blue-500">Dashboard</a>
+            <span class="mx-2">/</span>
+            <span class="mx-2 bg-gray-800">Rooms</span>
+        </nav>
     </div>
 
     <div class="container mx-auto px-4 py-6">
         <div class="bg-white shadow-md rounded-lg">
-            <div class="flex justify-between items-center p-6 border-b-gray-600">
-                <h2 class="text-2xl font-semibold text-gray-800">Rooms Management</h2>
+            <h2 class="text-2xl font-semibold text-gray-800 p-3">Rooms Management</h2>
+
+            <div class="flex justify-between items-center p-6 border-b bg-white shadow-md rounded-lg">
+                <input id="searchInput" type="search" placeholder="Search by number or ID"
+                    class="border border-gray-300 rounded-lg py-2 px-4 w-1/3" />
                 <button onclick="openAddRoomModal()"
                     class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded inline-flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
@@ -28,12 +27,12 @@
                     Add Room
                 </button>
             </div>
-
             <div class="p-6">
                 <table class="w-full">
                     <thead>
                         <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
-                            <th class="py-3 px-6 text-left">Number</th>
+                        <th class="py-3 px-6 text-left">id</th>
+                            <th class="py-3 px-6 text-left">RoomNumber</th>
                             <th class="py-3 px-6 text-left">Room Status</th>
                             <th class="py-3 px-6 text-left">Capacity</th>
                             <th class="py-3 px-6 text-left">Block</th>
@@ -44,6 +43,7 @@
                         @if($rooms->count())
                         @foreach ($rooms as $room)
                         <tr class="border-b border-gray-200 hover:bg-gray-100">
+                        <td class="py-3 px-6 text-left">{{$room->id}}</td>
                             <td class="py-3 px-6 text-left">{{$room->roomNumber}}</td>
                             <td class="py-3 px-6 text-left">
                                 <span
@@ -56,18 +56,20 @@
                             <td class="py-3 px-6 text-center">
                                 <div class="flex item-center justify-center">
                                     <button onclick="openEditRoomModal()"
-                                        class="w-4 mr-2 transform hover:text-blue-500 hover:scale-110">
+                                        class="w-4 mr-2 transform text-blue-500 hover:text-blue-500 hover:scale-110">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                         </svg>
                                     </button>
-                                    <form action="{{ route('rooms.destroy', $room->id) }}" method="POST"
-                                        class="w-4 mr-2 transform hover:text-red-500 hover:scale-110">
+
+                                    <form id="deleteRoomForm{{$room->id}}" method="POST"
+                                        action="{{ route('rooms.destroy', $room->id) }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="flex items-center">
+                                        <button type="button" onclick="confirmDeleteRoom({{ $room->id }})"
+                                            class="text-red-500 hover:scale-110 transition transform">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke="currentColor" class="w-5 h-5">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -173,9 +175,12 @@
         </div>
     </div>
 
-    <div id="editRoomModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3 text-center">
+    <!-- update Room Modal -->
+    <div id="editRoomModal" 
+         class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm hidden overflow-y-auto h-full w-full z-50 transition-all duration-300 flex items-center justify-center">
+        <div
+            class="relative mx-auto p-6 border-0 w-full max-w-md shadow-2xl rounded-xl bg-white transform transition-all duration-300">
+            <!-- Modal Header -->
                 <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Room</h3>
                 <form id="editRoomForm" action="{{route('rooms.update',$room->id)}}" method="POST" class="mt-4">
                     @csrf
@@ -183,13 +188,13 @@
                     <input type="number" name="roomNumber" id="editRoomNumber" placeholder="Room Number"
                         class="w-full px-3 py-2 border rounded-md mb-3" value="{{$room->roomNumber}}" required>
                     <select name="roomStatus" id="editRoomStatus" class="w-full px-3 py-2 border rounded-md mb-3">
-                        <option value="{{$room->roomStatus}}" disabled selected></option>
+                        <option value="{{$room->id}}" disabled selected>{{$room->roomStatus}}</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                         <option value="maintenance">Maintenance</option>
                     </select>
-                    <input type="text" name="capacity" id="editRoomCapacity" value="{{$room->capacity}}" placeholder="Room Capacity"
-                        class="w-full px-3 py-2 border rounded-md mb-3">
+                    <input type="text" name="capacity" id="editRoomCapacity" value="{{$room->capacity}}"
+                        placeholder="Room Capacity" class="w-full px-3 py-2 border rounded-md mb-3">
                     <input type="text" name="block" id="editRoomBlock" value="{{$room->block}}" placeholder="Block"
                         class="w-full px-3 py-2 border rounded-md mb-3">
                     <div class="flex justify-between mt-4">
@@ -204,9 +209,11 @@
                 </form>
             </div>
         </div>
-    </div> 
+    </div>
 
     <x-slot:scripts>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script>
         function openAddRoomModal() {
             document.getElementById('addRoomModal').classList.remove('hidden');
@@ -223,6 +230,111 @@
         function closeEditRoomModal() {
             document.getElementById('editRoomModal').classList.add('hidden');
         }
+
+        async function confirmDeleteRoom(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`{{ url('rooms') }}/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                            }
+                        });
+
+                        if (response.ok) {
+                            Swal.fire('Deleted!', 'Room has been deleted.', 'success');
+                            const row = document.querySelector(`#deleteRoomForm${id}`).closest('tr');
+                            if (row) {
+                                row.remove();
+                            }
+                        } else {
+                            const errorData = await response.json();
+                            Swal.fire('Error!', errorData.message || 'Failed to delete.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        Swal.fire('Error!', 'An error occurred.', 'error');
+                    }
+                }
+            });
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const q = this.value;
+            console.log(q);
+            const url = "{{ route('rooms.index') }}?q=" + encodeURIComponent(q);
+
+            axios.get(url)
+                .then(function(response) {
+                    const rooms = response.data.rooms;
+                    const tbody = document.querySelector('tbody');
+                    tbody.innerHTML = '';
+
+                    if (rooms.length > 0) {
+                        rooms.forEach(function(room) {
+                            const row = document.createElement('tr');
+                            row.classList.add("border-b", "border-gray-200", "hover:bg-gray-100");
+                            row.innerHTML = `
+                            <td class="py-3 px-6 text-center">${room.id}</td>
+                            <td class="py-3 px-6 text-center">${room.roomNumber}</td>
+                            <td class="py-3 px-6 text-center">
+                                <span class="${room.roomStatus == 'available' ? 'bg-green-200 text-green-600' : (room.roomStatus == 'occupied' ? 'bg-red-200 text-red-600' : 'bg-yellow-200 text-yellow-600')} py-1 px-3 rounded-full text-sm">
+                                    ${room.roomStatus}
+                                </span>
+                            </td>        
+                            <td class="py-3 px-6 text-center">${room.capacity}</td>
+                            <td class="py-3 px-6 text-center">${room.block}</td>
+                            
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex item-center justify-center">
+                                    <button class="w-4 mr-2 transform text-blue-500 hover:text-blue-500 hover:scale-110">
+                                        <a href="/rooms/${room.id}/edit" class="w-4 mr-2 transform text-blue-500 hover:text-blue-500 hover:scale-110">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </a>
+                                    </button>
+                                    <form data-delete-room action="/rooms/${room.id}"
+                                        method="POST">
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="submit"
+                                            class="w-5 h-5 mr-2 transform text-red-500 hover:text-red-500 hover:scale-110">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        `;
+                            tbody.appendChild(row);
+                        });
+                    } else {
+                        tbody.innerHTML =
+                            `<tr><td colspan="8" class="text-center text-gray-500 py-4">No Room found.</td></tr>`;
+                    }
+                })
+                .catch(function(error) {
+                    console.error("Error fetching Room:", error);
+                });
+        });
         </script>
     </x-slot:scripts>
 </x-layouts.app>
