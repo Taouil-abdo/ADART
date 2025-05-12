@@ -34,7 +34,7 @@
             Supplier
         </x-nav-link>
         
-        <x-nav-link route="residents" icon="calendar">
+        <x-nav-link route="residents.index" icon="calendar">
             Residents
         </x-nav-link>
         

@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 // use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\SupplierController;
@@ -39,30 +40,37 @@ Route::delete('/category/{id}', [CategoryController::class, 'destroy'])->name('c
 
 // ------------ Stock -------------
 Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
+// Route::get('/stock', [StockController::class, 'statistics'])->name('stock.statistics');
+Route::get('/stock/create', [StockController::class, 'create'])->name('stock.create');
 Route::post('/stock', [StockController::class, 'store'])->name('stock.store');
 Route::get('/stock/edit/{id}', [StockController::class, 'edit'])->name('stock.edit');
 Route::put('/stock/update/{id}', [StockController::class, 'update'])->name('stock.update');
 Route::delete('/stock/{id}', [StockController::class, 'destroy'])->name('stock.destroy');
-// Route::get('/stock/statistics', [StockController::class, 'statistics'])->name('statistics');
 
-// Route::get('/', [StockController::class, 'dashboard'])->name('dashboard');
-// Route::resource('stocks', StockController::class)->except(['create', 'edit', 'show']);
 // ------------ End Stock -------------
 
 // ------------ Supplier -------------
 Route::get('/supplier', [SupplierController::class, 'index'])->name('supplier.index');
 Route::post('/supplier', [SupplierController::class, 'store'])->name('supplier.store');
+Route::get('/supplier/create', [SupplierController::class, 'create'])->name('supplier.create');
 Route::get('/supplier/edite/{id}', [SupplierController::class, 'edit'])->name('supplier.edit');
 Route::put('/supplier/update/{id}', [SupplierController::class, 'update'])->name('supplier.update');
 Route::delete('/supplier/{id}', [SupplierController::class, 'destroy'])->name('supplier.destroy');
 // ------------ End Supplier -------------
 
-Route::get('/residents', [ResidentController::class, 'index'])->name('residents');
-Route::post('/residents', [ResidentController::class, 'store'])->name('residents.store');
-Route::get('/residents/create', [ResidentController::class, 'create'])->name('residents.create');
-Route::get('/residents/{id}/download', [ResidentController::class, 'downloadPdf'])->name('residents.download');
-// Route::get('/residents', [ResidentController::class, 'exportExcel'])->name('residents.export');
-// Route::get('/residents', [ResidentController::class, 'exportPdf'])->name('residents.export.pdf');
+
+    Route::get('/residents', [ResidentController::class, 'index'])->name('residents.index');
+    Route::post('/residents', [ResidentController::class, 'store'])->name('residents.store');
+    Route::get('/residents/create', [ResidentController::class, 'create'])->name('residents.create');
+    Route::get('/residents/{id}/edit', [ResidentController::class, 'edit'])->name('residents.edit');
+    Route::put('/residents/{id}', [ResidentController::class, 'update'])->name('residents.update');
+    Route::delete('/residents/{id}', [ResidentController::class, 'destroy'])->name('residents.destroy');
+    Route::get('/residents/{id}/download', [ResidentController::class, 'downloadPdf'])->name('residents.download');
+
+
+
+
+
 
 });
 
@@ -82,3 +90,10 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 // ------------ Logout -------------
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 // ------------ End Logout -------------
+
+
+// ------------ Profile -------------
+Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+// Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+Route::put('/profile/update/{id}', [ProfileController::class, 'update'])->name('profile.update');
+// Route::get('/profile/change-password', [AuthController::class, 'showChangePasswordForm'])->name('profile.change-password');
