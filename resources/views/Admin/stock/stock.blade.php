@@ -1,16 +1,12 @@
 <x-layouts.app>
-    <x-slot:title>Dashboard - DART TALIB</x-slot:title>
+    <x-slot:title>StocK_Management - DART TALIB</x-slot:title>
 
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Dashboard Overview</h1>
-        <div>
-            <select id="dateFilter" class="bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
-                <option value="7">Last 7 days</option>
-                <option value="30">Last 30 days</option>
-                <option value="month">This month</option>
-                <option value="quarter">Last quarter</option>
-            </select>
-        </div>
+    <div class="flex flex-col gap-4 mb-6">
+        <nav class="text-xl text-gray-600">
+            <a href="{{ route('dashboard') }}" class="text-blue-500">Dashboard</a>
+            <span class="mx-2">/</span>
+            <span class="mx-2">Stocks</span>
+        </nav>
     </div>
 
     <!-- Stats Cards -->
@@ -97,9 +93,12 @@
 
     <div class="container mx-auto px-4 py-6">
         <div class="bg-white shadow-md rounded-lg">
-            <div class="flex justify-between items-center p-6 border-b">
-                <h2 class="text-2xl font-semibold text-gray-800">Stock Management</h2>
-                <button onclick="openAddStockModal()"
+        <h2 class="text-2xl font-semibold text-gray-800 p-3">Stock Management</h2>
+
+            <div class="flex justify-between items-center p-6 border-b bg-white shadow-md rounded-lg">
+                <input id="searchInput" type="search" placeholder="Search by name or ID"
+                   class="border border-gray-300 rounded-lg py-2 px-4 w-1/3" />
+                <a href="{{route('stock.create')}}"
                     class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded inline-flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
                         fill="currentColor">
@@ -108,7 +107,7 @@
                             clip-rule="evenodd" />
                     </svg>
                     Add Stock Item
-                </button>
+                </a>
             </div>
 
             <div class="p-6">
@@ -125,6 +124,7 @@
                                 <th class="py-3 px-6 text-left">ID</th>
                                 <th class="py-3 px-6 text-left">Item Name</th>
                                 <th class="py-3 px-6 text-left">Category</th>
+                                <th class="py-3 px-6 text-left">Supplier</th>
                                 <th class="py-3 px-6 text-left">Quantity</th>
                                 <th class="py-3 px-6 text-left">Unit</th>
                                 <th class="py-3 px-6 text-center">Status</th>
@@ -144,34 +144,44 @@
                                         {{ $stock->category->name ?? 'N/A' }}
                                     </td>
                                     <td class="py-3 px-6 text-left">
+                                        {{ $stock->supplier->name }}
+                                    </td>
+                                    <td class="py-3 px-6 text-left">
                                         {{ $stock->quantity }}
                                     </td>
                                     <td class="py-3 px-6 text-left">
                                         {{ $stock->unit }}
                                     </td>
                                     <td class="py-3 px-6 text-center">
-                                        <span class="{{ $stock->status_class }} py-1 px-3 rounded-full text-xs">
+                                        <span class="{{ $stock->status_class }} py-1 px-3 rounded-full text-xs 
+                                            {{ $stock->StockStatus === 'in_stock' ? 'bg-green-100 text-green-800' : '' }}
+                                            {{ $stock->StockStatus === 'low_stock' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                            {{ $stock->StockStatus === 'out_of_stock' ? 'bg-red-100 text-red-800' : '' }}">
                                             {{ $stock->StockStatus }}
                                         </span>
                                     </td>
                                     <td class="py-3 px-6 text-center">
                                         <div class="flex item-center justify-center">
-                                            <button onclick="openEditStockModal('{{ $stock->id }}', '{{ $stock->item_name }}', '{{ $stock->category_id }}', {{ $stock->quantity }}, '{{ $stock->unit }}', '{{ $stock->supplier_id }}')"
+                                            <a href = "{{ route('stock.edit',$stock->id) }}"
                                                 class="w-4 mr-2 transform hover:text-blue-500 hover:scale-110">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                                 </svg>
-                                            </button>
-                                            <button onclick="confirmDeleteStock('{{ $stock->id }}')"
-                                                class="w-4 mr-2 transform hover:text-red-500 hover:scale-110">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            </a>
+                                            <form data-stock-delete action="{{route('stock.destroy', $stock->id)}}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type = "submit"
+                                                  class="w-4 mr-2 transform hover:text-red-500 hover:scale-110">
+                                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
+                                                  </svg>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -191,169 +201,10 @@
         </div>
     </div>
 
-    {{-- Add Stock Modal --}}
-    <div id="addStockModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg leading-6 font-medium text-gray-900 text-center">Add New Stock Item</h3>
-                <form action="{{ route('stock.store') }}" method="POST" class="mt-4">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="item_name" class="block text-sm font-medium text-gray-700 text-left">Item Name</label>
-                        <input type="text" name="item_name" id="item_name" placeholder="Item Name"
-                            class="w-full px-3 py-2 border rounded-md" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="category_id" class="block text-sm font-medium text-gray-700 text-left">Category</label>
-                        <select name="category_id" id="category_id" class="w-full px-3 py-2 border rounded-md" required>
-                            <option value="">Select Category</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="quantity" class="block text-sm font-medium text-gray-700 text-left">Quantity</label>
-                        <input type="number" name="quantity" id="quantity" placeholder="Quantity"
-                            class="w-full px-3 py-2 border rounded-md" required min="0">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="unit" class="block text-sm font-medium text-gray-700 text-left">Unit</label>
-                        <select name="unit" id="unit" class="w-full px-3 py-2 border rounded-md" required>
-                            <option value="">Select Unit</option>
-                            <option value="kg">kg</option>
-                            <option value="g">g</option>
-                            <option value="l">l</option>
-                            <option value="ml">ml</option>
-                            <option value="pcs">pcs</option>
-                            <option value="box">box</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="supplier_id" class="block text-sm font-medium text-gray-700 text-left">Supplier</label>
-                        <select name="id" id="supplier_id" class="w-full px-3 py-2 border rounded-md" required>
-                            <option value="">Select Supplier</option>
-                            @foreach($suppliers as $supplier)
-                                <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div class="flex justify-between mt-4">
-                        <button type="button" onclick="closeAddStockModal()"
-                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
-                            Cancel
-                        </button>
-                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                            Save
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    {{-- Edit Stock Modal --}}
-    <div id="editStockModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg leading-6 font-medium text-gray-900 text-center">Edit Stock Item</h3>
-                <form id="editStockForm" action="" method="POST" class="mt-4">
-                    @csrf
-                    @method('PUT')
-                    
-                    <div class="mb-3">
-                        <label for="edit_item_name" class="block text-sm font-medium text-gray-700 text-left">Item Name</label>
-                        <input type="text" name="item_name" id="edit_item_name" placeholder="Item Name"
-                            class="w-full px-3 py-2 border rounded-md" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="edit_category_id" class="block text-sm font-medium text-gray-700 text-left">Category</label>
-                        <select name="category_id" id="edit_category_id" class="w-full px-3 py-2 border rounded-md" required>
-                            <option value="">Select Category</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="edit_quantity" class="block text-sm font-medium text-gray-700 text-left">Quantity</label>
-                        <input type="number" name="quantity" id="edit_quantity" placeholder="Quantity"
-                            class="w-full px-3 py-2 border rounded-md" required min="0">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="edit_unit" class="block text-sm font-medium text-gray-700 text-left">Unit</label>
-                        <select name="unit" id="edit_unit" class="w-full px-3 py-2 border rounded-md" required>
-                            <option value="">Select Unit</option>
-                            <option value="kg">kg</option>
-                            <option value="g">g</option>
-                            <option value="l">l</option>
-                            <option value="ml">ml</option>
-                            <option value="pcs">pcs</option>
-                            <option value="box">box</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="edit_supplier_id" class="block text-sm font-medium text-gray-700 text-left">Supplier</label>
-                        <select name="id" id="edit_supplier_id" class="w-full px-3 py-2 border rounded-md" required>
-                            <option value="">Select Supplier</option>
-                            @foreach($suppliers as $supplier)
-                                <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div class="flex justify-between mt-4">
-                        <button type="button" onclick="closeEditStockModal()"
-                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
-                            Cancel
-                        </button>
-                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                            Update
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    {{-- Delete Confirmation Modal --}}
-    <div id="deleteConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Confirm Delete</h3>
-                <div class="mt-2 px-7 py-3">
-                    <p class="text-sm text-gray-500">
-                        Are you sure you want to delete this stock item? This action cannot be undone.
-                    </p>
-                </div>
-                <div class="flex justify-between mt-4">
-                    <button type="button" onclick="closeDeleteConfirmModal()"
-                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
-                        Cancel
-                    </button>
-                    <form id="deleteStockForm" action="" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-                            Delete
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <x-slot:scripts>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script>
             // Chart initialization
             document.addEventListener('DOMContentLoaded', function() {
@@ -364,13 +215,13 @@
                 new Chart(stockStatusCtx, {
                     type: 'pie',
                     data: {
-                        labels: stockStatusData.map(item => item.stock_status),
+                        labels: stockStatusData.map(item => item.StockStatus),
                         datasets: [{
                             data: stockStatusData.map(item => item.count),
                             backgroundColor: [
-                                'rgba(52, 211, 153, 0.8)',  // Green for In Stock
+                                'rgba(239, 68, 68, 0.8)' ,   // Red for Out of Stock
                                 'rgba(251, 191, 36, 0.8)',  // Yellow for Low Stock
-                                'rgba(239, 68, 68, 0.8)'    // Red for Out of Stock
+                                'rgba(52, 211, 153, 0.8)'  // Green for In Stock
                             ],
                             borderWidth: 1
                         }]
@@ -416,39 +267,125 @@
                     }
                 });
             });
-
-            // Modal functions
-            function openAddStockModal() {
-                document.getElementById('addStockModal').classList.remove('hidden');
-            }
-
-            function closeAddStockModal() {
-                document.getElementById('addStockModal').classList.add('hidden');
-            }
-
-            function openEditStockModal(id, itemName, categoryId, quantity, unit, supplierId) {
-                document.getElementById('edit_item_name').value = itemName;
-                document.getElementById('edit_category_id').value = categoryId;
-                document.getElementById('edit_quantity').value = quantity;
-                document.getElementById('edit_unit').value = unit;
-                document.getElementById('edit_supplier_id').value = supplierId;
-                
-                document.getElementById('editStockForm').action = `/stock/update/${id}`;
-                document.getElementById('editStockModal').classList.remove('hidden');
-            }
-
-            function closeEditStockModal() {
-                document.getElementById('editStockModal').classList.add('hidden');
-            }
-
-            function confirmDeleteStock(id) {
-                document.getElementById('deleteStockForm').action = `/stock/${id}`;
-                document.getElementById('deleteConfirmModal').classList.remove('hidden');
-            }
-
-            function closeDeleteConfirmModal() {
-                document.getElementById('deleteConfirmModal').classList.add('hidden');
-            }
         </script>
+        <script>
+            document.querySelectorAll('form[data-stock-delete]').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault(); 
+                    const url = this.action;
+                    const row = this.closest('tr');
+
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "This action cannot be undone!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            axios.delete(url, {
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                }
+                            })
+                            .then(response => {
+                                if (response.status === 200) {
+                                    Swal.fire(
+                                        'Deleted!',
+                                        'Stock item has been deleted.',
+                                        'success'
+                                    );
+                                    row.remove();
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error deleting stock item:', error);
+                                Swal.fire(
+                                    'Error!',
+                                    'Failed to delete the stock item. Please try again.',
+                                    'error'
+                                );
+                            });
+                        }
+                    });
+                });
+            });
+
+
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', function() {
+            const q = this.value;
+            const url = "{{ route('stock.index') }}?q=" + encodeURIComponent(q);
+
+            axios.get(url)
+                .then(function(response) {
+                    const stocks = response.data.stocks;
+                    const tbody = document.querySelector('tbody');
+                    tbody.innerHTML = '';
+
+                    if (stocks.length > 0) {
+                        stocks.forEach(function(stock) {
+                            const row = document.createElement('tr');
+                            row.classList.add("border-b", "border-gray-200", "hover:bg-gray-100");
+
+                            row.innerHTML = `
+                            
+                                <td class="py-3 px-6 text-left"> ${stock.id} </td>
+                                <td class="py-3 px-6 text-left"> ${stock.item_name} </td>
+                                <td class="py-3 px-6 text-left"> ${stock.category.name} </td>
+                                <td class="py-3 px-6 text-left"> ${stock.supplier.name} </td>
+                                <td class="py-3 px-6 text-left"> ${stock.quantity} </td>
+                                <td class="py-3 px-6 text-left"> ${stock.unit} </td>   
+                                <td class="py-3 px-6 text-center">
+                                        <span class=" py-1 px-3 rounded-full text-xs 
+                                            ${stock.StockStatus === 'in_stock' ? 'bg-green-200 text-green-600' : '' }
+                                            ${ stock.StockStatus === 'low_stock' ? 'bg-yellow-200 text-yellow-600' : '' }
+                                            ${ stock.StockStatus === 'out_of_stock' ? 'bg-red-200 text-red-600' : '' }">
+                                            ${ stock.StockStatus }
+                                        </span>
+                                </td>
+                                <td class="py-3 px-6 text-center">
+                                <div class="flex item-center justify-center">
+                                    <button class="text-blue-500 hover:scale-110 transition transform">
+                                        <a href="/stock/${stock.id}/edit">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </a>
+                                    </button>
+                                    <form data-delete-stock action="/stock/${stock.id}"
+                                        method="POST">
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="submit"
+                                            class="w-5 h-5 mr-2 transform hover:text-red-500 hover:scale-110">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        `;
+                            tbody.appendChild(row);
+                        });
+                    } else {
+                        tbody.innerHTML =
+                            `<tr><td colspan="8" class="text-center text-gray-500 py-4">No Stock found.</td></tr>`;
+                    }
+                })
+                .catch(function(error) {
+                    console.error("Error fetching stock:", error);
+                });
+            });
+
+        </script>
+
     </x-slot:scripts>
 </x-layouts.app>
