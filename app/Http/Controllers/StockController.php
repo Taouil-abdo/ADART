@@ -5,113 +5,122 @@ namespace App\Http\Controllers;
 use App\Models\Stock;
 use App\Models\Category;
 use App\Models\Supplier;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use App\Http\Requests\StockRequest;
 
 class StockController extends Controller
 {
     /**
      * Display a listing of the stocks.
      */
-    public function index()
-    {
-        
-        
-      $totalItems = Stock::count();
-      $totalQuantity = Stock::sum('quantity');
-      $stockStatusCounts = Stock::select('StockStatus', DB::raw('count(*) as count'))
-      ->groupBy('StockStatus')
-      ->get();
 
-      $itemsByCategory = Stock::select('categories.name as category', DB::raw('count(*) as count'))
-      ->join('categories', 'stocks.category_id', '=', 'categories.id')
-      ->groupBy('categories.name')
-      ->get();
+     private $alert_quantity = 100;
 
-      $lowStockItems = Stock::where('StockStatus', 'Low Stock')->count();
-      $outOfStockItems = Stock::where('StockStatus', 'Out of Stock')->count();
-      $recentStocks = Stock::with(['category', 'supplier'])->latest()->take(5)->get();
+     public function index(Request $request)
+     {
+         $totalItems = Stock::count();
+         $totalQuantity = Stock::sum('quantity');
+         $stockStatusCounts = Stock::select('StockStatus', DB::raw('count(*) as count'))
+         ->groupBy('StockStatus')
+         ->get();
 
-      $stocks = Stock::with(['category', 'supplier'])->latest()->paginate(5);
-      $categories = Category::all();
-      $suppliers = Supplier::all();
+         $itemsByCategory = Stock::select('categories.name as category', DB::raw('count(*) as count'))
+         ->join('categories', 'stocks.category_id', '=', 'categories.id')
+         ->groupBy('categories.name')
+         ->get();
+         
+         $lowStockItems = Stock::where('StockStatus', 'low_stock')->count();
+         $outOfStockItems = Stock::where('StockStatus', 'out_of_stock')->count();
+         $recentStocks = Stock::with(['category', 'supplier'])->latest()->take(5)->get();
 
-      return view('Admin.stock.stock', compact('totalItems', 'totalQuantity', 'stockStatusCounts', 
-            'itemsByCategory', 'lowStockItems', 'outOfStockItems','recentStocks','stocks','categories',
-        'suppliers'
-       ));    
+         $query = supplier::query();
+         if($request->ajax() || $request->wantsJson()){
+             $search = $request->q;
+             $query = Stock::with(['category', 'supplier'])
+                 ->where('item_name', 'LIKE', "%$search%")
+                 ->orWhere('quantity', 'LIKE', "%$search%")
+                 ->orWhere('StockStatus', 'LIKE', "%$search%");
+             return response()->json([
+                 'stocks'=> $query->get()
+             ]);
+         }
+         
+         $stocks = Stock::with(['category', 'supplier'])->latest()->paginate(5);
+
+         return view('Admin.stock.stock', compact('totalItems', 'totalQuantity', 'stockStatusCounts', 
+            'itemsByCategory', 'lowStockItems', 'outOfStockItems','recentStocks','stocks'
+         )); 
+     } 
+
+   public function create(){
+     $categories = Category::all();
+     $suppliers = Supplier::all();
+     return view('Admin.stock.create', compact('categories', 'suppliers'));
    }
 
     /**
+     * Show the form for editing the specified stock.
+     */
+    public function edit($id)
+    {
+        $stock = Stock::findOrFail($id);
+        $categories = Category::all();
+        $suppliers = Supplier::all();
+        return view('Admin.stock.update', compact('stock', 'categories', 'suppliers'));
+   }
+    /**
      * Store a newly created stock in storage.
      */
-    public function store(Request $request)
+    public function store(StockRequest $request)
     {
-        $validated = $request->validate([
-            'item_name' => 'required|string|max:255',
-            'quantity' => 'required|numeric|min:0',
-            'unit' => 'required|string|max:50',
-            'category_id' => 'required|exists:categories,id',
-            'supplier_id' => 'required|exists:suppliers,id',
-        ]);
-        
-        // Generate a unique stock ID
-        $validated['stock_id'] = 'STK-' . Str::upper(Str::random(6));
-        
-        // Set stock status based on quantity
-        if ($validated['quantity'] > 10) {
-            $validated['StockStatus'] = 'In Stock';
-        } elseif ($validated['quantity'] > 0) {
-            $validated['StockStatus'] = 'Low Stock';
-        } else {
-            $validated['StockStatus'] = 'Out of Stock';
-        }
-
-        Stock::create($validated);
-
-        return redirect()->route('stock.index')
-            ->with('success', 'Stock item created successfully.');
+        $data = $request->validated();
+        $data['StockStatus'] = $this->determineStockStatus($data['quantity']);
+        Stock::create($data);
+        return redirect()->route('stock.index')->with('success', 'Stock item created successfully.');
     }
 
     /**
      * Update the specified stock in storage.
      */
-    public function update(Request $request, Stock $stock)
+    public function update(StockRequest $request, $id)
     {
-        $validated = $request->validate([
-            'item_name' => 'required|string|max:255',
-            'quantity' => 'required|numeric|min:0',
-            'unit' => 'required|string|max:50',
-            'category_id' => 'required|exists:categories,id',
-            'supplier_id' => 'required|exists:suppliers,id',
-        ]);
-        
-        // Set stock status based on quantity
-        if ($validated['quantity'] > 10) {
-            $validated['StockStatus'] = 'In Stock';
-        } elseif ($validated['quantity'] > 0) {
-            $validated['StockStatus'] = 'Low Stock';
-        } else {
-            $validated['StockStatus'] = 'Out of Stock';
-        }
-
+        $stock = Stock::findOrFail($id);
+        $validated = $request->validated();
+        $validated['StockStatus'] = $this->determineStockStatus($validated['quantity']);
         $stock->update($validated);
-
-        return redirect()->route('stock.index')
-            ->with('success', 'Stock item updated successfully.');
+        if($stock){
+            return response()->json(["success" => "Stock item updated successfully."]);
+        }else{
+            return response()->json(["error" => "Stock item not found."], 404);
+        }
     }
 
     /**
      * Remove the specified stock from storage.
      */
-    public function destroy(Stock $stock)
+    public function destroy($id)
     {
+        $stock = Stock::findOrFail($id);
+        if (!$stock) {
+            return response()->json(["error" => "Stock item not found."], 404);
+        }
         $stock->delete();
-
-        return redirect()->route('stock.index')
-            ->with('success', 'Stock item deleted successfully.');
+        return response()->json(["success" => "Stock item deleted successfully."]);
     }
-
+    /**
+     * Determine the stock status based on the quantity.
+     */
+    public function determineStockStatus($quantity)
+    {
+        if ($quantity > 20) {
+            return 'in_stock';
+        } elseif ($quantity > 1) {
+            return 'low_stock';
+        } else {
+            return 'out_of_stock';
+        }
+    }
     
 }

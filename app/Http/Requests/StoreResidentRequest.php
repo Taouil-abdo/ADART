@@ -23,15 +23,25 @@ class StoreResidentRequest extends FormRequest
     {
         return [
             'fullname' => 'required|string|max:255',
-            'email' => 'required|email|unique:residents,email',
+            'email' => 'required|email',
             'status' => 'required|string|max:50',
             'profile_img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'birthday' => 'required|date',
+            'birthday' => 'required|date|before:today|before_or_equal:' . now()->subYears(26)->toDateString(),
             'address' => 'required|string|max:255',
             'age' => 'required|integer|min:0',
-            'gender' => 'required|string|in:male,female,other',
+            'gender' => 'required|string|in:Boy,Girl',
             'school_level' => 'nullable|string|max:100',
-            'date_joined' => 'required|date',
+            'date_joined' => [
+                'required',
+                'date',
+                'after_or_equal:birthday',
+                function ($attribute, $value, $fail) {
+                    $birthday = request()->input('birthday');
+                    if ($birthday && (strtotime($value) < strtotime($birthday) + 10 * 365 * 24 * 60 * 60)) {
+                        $fail('The date of join must be at least 10 years after the birthday.');
+                    }
+                },
+            ],
             'date_detached' => 'nullable|date|after_or_equal:date_joined',
             'urgent_contact' => 'required|string|max:15',
             'school' => 'nullable|string|max:255',
