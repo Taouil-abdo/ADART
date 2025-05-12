@@ -17,7 +17,16 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-              'name' => fake()->word,
+            'name' => $this->faker->randomElement([
+                'Food',
+                'Clothing',
+                'Hygiene Products',
+                'Books',
+                'School Supplies',
+                'Cleaning Materials',
+                'Electronics',
+                'Medical Supplies',
+            ]),        
         ];
     }
 }
