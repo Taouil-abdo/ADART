@@ -26,7 +26,6 @@ class StoreSupplierRequest extends FormRequest
             'phoneNumber' => 'required',
             'email' => 'required|email|max:255',
             'address'=> 'required',
-            'paymentMethod'=> 'required',
             'suppliedProduct'=> 'required',
             'isActive'=> 'required|boolean',
         ];

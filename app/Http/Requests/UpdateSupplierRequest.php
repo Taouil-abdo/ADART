@@ -22,7 +22,12 @@ class UpdateSupplierRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'required|string|max:255',
+            'phoneNumber' => 'required',
+            'email' => 'required|email|max:255',
+            'address'=> 'required',
+            'suppliedProduct'=> 'required',
+            'isActive'=> 'required|boolean',
         ];
     }
 }
